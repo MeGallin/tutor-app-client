@@ -3,7 +3,8 @@
  */
 
 // Base API URL - can be changed based on environment
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 /**
  * Gets the authentication token from local storage
@@ -41,7 +42,7 @@ const getHeaders = (customHeaders = {}) => {
 const fetchWithErrorHandling = async (url, options) => {
   try {
     const response = await fetch(url, options);
-    
+
     // Parse response
     let data;
     const contentType = response.headers.get('content-type');
@@ -50,7 +51,7 @@ const fetchWithErrorHandling = async (url, options) => {
     } else {
       data = await response.text();
     }
-    
+
     // Handle API errors
     if (!response.ok) {
       throw {
@@ -60,7 +61,7 @@ const fetchWithErrorHandling = async (url, options) => {
         data,
       };
     }
-    
+
     return { data, status: response.status };
   } catch (error) {
     // Re-throw with useful info

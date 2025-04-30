@@ -3,14 +3,21 @@ import Footer from '../common/Footer';
 
 /**
  * Main layout wrapper that applies the header and footer
- * Adds appropriate padding to prevent content from being hidden
+ * Centers content both vertically and horizontally using flexbox
+ * Maintains height calculation to account for fixed header and footer
  */
 export default function MainLayout({ children }) {
   return (
     <>
       <Header />
-      <main className="container-fluid" style={{ paddingTop: '4.5rem', paddingBottom: '3.5rem' }}>
-        {children}
+      <main
+        className="container-fluid d-flex justify-content-center align-items-center"
+        style={{
+          minHeight:
+            'calc(100vh - 9rem)' /* 100vh minus header and footer height */,
+        }}
+      >
+        <div className="w-100">{children}</div>
       </main>
       <Footer />
     </>
