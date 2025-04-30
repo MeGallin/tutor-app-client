@@ -1,0 +1,59 @@
+/* 
+ * Global application styles
+ * These styles extend Bootstrap's default styling
+ */
+
+/* Custom variables */
+:root {
+  --primary-dark: #0056b3;
+  --secondary-light: #f8f9fa;
+  --transition-speed: 0.3s;
+}
+
+/* Layout adjustments for the fixed header and footer */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 60px; /* Footer height */
+}
+
+/* Custom button hover effect */
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-speed) ease;
+}
+
+/* Card styling enhancements */
+.card {
+  transition: transform var(--transition-speed) ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Form control focus enhancement */
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
