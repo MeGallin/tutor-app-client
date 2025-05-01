@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/layout/MainLayout';
-import useForm from '../../hooks/useForm';
+import { useForm } from '../../hooks/useForm';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../utils/api';
 import { useMemo } from 'react';
 
 /**
@@ -10,10 +10,11 @@ import { useMemo } from 'react';
  */
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth();
+  const [apiError, setApiError] = useState('');
 
   // Form validation function
-  const validateForm = (values) => {
+  const validate = (values) => {
     const errors = {};
 
     if (!values.name) {
@@ -43,26 +44,20 @@ export default function RegisterPage() {
 
   // Form submission handler
   const handleRegister = async (values) => {
+    setApiError('');
     try {
-      // When backend is ready, replace with actual API call
-      // const response = await api.post('/auth/register', {
-      //   name: values.name,
-      //   email: values.email,
-      //   password: values.password
-      // });
-      // login(response.data.user, response.data.token);
+      // Use our auth context's register function
+      await register({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
 
-      // For now, simulate successful registration
-      console.log('Registration form submitted:', values);
-      alert(
-        'Registration functionality will be connected to the backend API once available.',
-      );
-
-      // Redirect to dashboard or home page after registration
-      // navigate('/dashboard');
+      // Redirect to dashboard after successful registration
+      navigate('/dashboard');
     } catch (error) {
       console.error('Registration error:', error);
-      // Handle registration errors
+      setApiError(error.message || 'Registration failed. Please try again.');
     }
   };
 
@@ -82,8 +77,8 @@ export default function RegisterPage() {
       password: '',
       confirmPassword: '',
     },
-    validateForm,
     handleRegister,
+    validate,
   );
 
   // Determine if form is valid (all fields filled and no errors)
@@ -104,6 +99,12 @@ export default function RegisterPage() {
         <div className="py-5">
           <div className="mx-auto">
             <h2 className="mb-4">Create Account</h2>
+
+            {apiError && (
+              <div className="alert alert-danger" role="alert">
+                {apiError}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="mb-3">
