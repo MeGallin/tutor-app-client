@@ -13,17 +13,30 @@ function BootstrapInitializer({ children }) {
   useEffect(() => {
     // This ensures Bootstrap's JavaScript plugins are properly initialized
     // after the component mounts
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].forEach(tooltipTriggerEl => {
+
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]',
+    );
+    [...tooltipTriggerList].forEach((tooltipTriggerEl) => {
       new window.bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
-    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-    [...popoverTriggerList].forEach(popoverTriggerEl => {
+
+    // Initialize popovers
+    const popoverTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="popover"]',
+    );
+    [...popoverTriggerList].forEach((popoverTriggerEl) => {
       new window.bootstrap.Popover(popoverTriggerEl);
     });
+
+    // Initialize dropdowns
+    const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+    [...dropdownElementList].forEach((dropdownToggleEl) => {
+      new window.bootstrap.Dropdown(dropdownToggleEl);
+    });
   }, []);
-  
+
   return children;
 }
 

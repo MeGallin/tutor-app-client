@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/layout/MainLayout';
-import useForm from '../../hooks/useForm';
+import { useForm } from '../../hooks/useForm';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../utils/api';
 import { useMemo } from 'react';
 
 /**
@@ -11,9 +11,10 @@ import { useMemo } from 'react';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [apiError, setApiError] = useState('');
 
   // Form validation function
-  const validateForm = (values) => {
+  const validate = (values) => {
     const errors = {};
 
     if (!values.email) {
@@ -31,22 +32,16 @@ export default function LoginPage() {
 
   // Form submission handler
   const handleLogin = async (values) => {
+    setApiError('');
     try {
-      // When backend is ready, replace this with actual API call
-      // const response = await api.post('/auth/login', values);
-      // login(response.data.user, response.data.token);
+      // Use our auth context's login function which uses our service
+      await login(values.email, values.password);
 
-      // For now, simulate successful login
-      console.log('Login form submitted:', values);
-      alert(
-        'Login functionality will be connected to the backend API once available.',
-      );
-
-      // Redirect to dashboard or home page after login
-      // navigate('/dashboard');
+      // Redirect to dashboard after successful login
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      // Handle login errors
+      setApiError(error.message || 'Login failed. Please try again.');
     }
   };
 
@@ -59,7 +54,7 @@ export default function LoginPage() {
     handleChange,
     handleBlur,
     handleSubmit,
-  } = useForm({ email: '', password: '' }, validateForm, handleLogin);
+  } = useForm({ email: '', password: '' }, handleLogin, validate);
 
   // Determine if form is valid (all fields filled and no errors)
   const isFormValid = useMemo(() => {
@@ -78,6 +73,12 @@ export default function LoginPage() {
         <div className=" py-5">
           <div className=" mx-auto">
             <h2 className="mb-4">Login</h2>
+
+            {apiError && (
+              <div className="alert alert-danger" role="alert">
+                {apiError}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="mb-3">
