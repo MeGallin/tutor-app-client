@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/layout/MainLayout';
 import { useForm } from '../../hooks/useForm';
 import { useAuth } from '../../context/AuthContext';
-import { useMemo } from 'react';
+import { useToast } from '../../context/ToastContext';
 
 /**
  * Login page with email/password form
@@ -12,6 +12,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [apiError, setApiError] = useState('');
+  const { showSuccess, showError } = useToast();
 
   // Form validation function
   const validate = (values) => {
@@ -34,18 +35,23 @@ export default function LoginPage() {
   const handleLogin = async (values) => {
     setApiError('');
     try {
-      // Use our auth context's login function which uses our service
       await login(values.email, values.password);
+
+      // Show success message
+      showSuccess('Login successful! Redirecting to dashboard...');
 
       // Redirect to dashboard after successful login
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      setApiError(error.message || 'Login failed. Please try again.');
+      const errorMsg =
+        error.message || 'Login failed. Please check your credentials.';
+      setApiError(errorMsg);
+      showError(errorMsg);
     }
   };
 
-  // Initialize the form using our custom hook
+  // Initialize form using our custom hook
   const {
     values,
     errors,
@@ -56,12 +62,9 @@ export default function LoginPage() {
     handleSubmit,
   } = useForm({ email: '', password: '' }, handleLogin, validate);
 
-  // Determine if form is valid (all fields filled and no errors)
+  // Determine if form is valid
   const isFormValid = useMemo(() => {
-    // Check if all required fields have values
     const allFieldsFilled = values.email && values.password;
-
-    // Check if there are any validation errors
     const noValidationErrors = Object.keys(errors).length === 0;
 
     return allFieldsFilled && noValidationErrors;
@@ -70,8 +73,8 @@ export default function LoginPage() {
   return (
     <MainLayout>
       <div className="col-md-12 border px-4 bg-body-tertiary">
-        <div className=" py-5">
-          <div className=" mx-auto">
+        <div className="py-5">
+          <div className="mx-auto">
             <h2 className="mb-4">Login</h2>
 
             {apiError && (
@@ -80,15 +83,23 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} noValidate>
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="needs-validation"
+            >
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
                   Email
                 </label>
                 <input
                   type="email"
-                  className={`form-control  form-control-lg ${
-                    touched.email && errors.email ? 'is-invalid' : ''
+                  className={`form-control form-control-lg ${
+                    touched.email && errors.email
+                      ? 'is-invalid'
+                      : touched.email
+                      ? 'is-valid'
+                      : ''
                   }`}
                   id="email"
                   name="email"
@@ -100,6 +111,9 @@ export default function LoginPage() {
                 {touched.email && errors.email && (
                   <div className="invalid-feedback">{errors.email}</div>
                 )}
+                {touched.email && !errors.email && (
+                  <div className="valid-feedback">Looks good!</div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -108,8 +122,12 @@ export default function LoginPage() {
                 </label>
                 <input
                   type="password"
-                  className={`form-control ${
-                    touched.password && errors.password ? 'is-invalid' : ''
+                  className={`form-control form-control-lg ${
+                    touched.password && errors.password
+                      ? 'is-invalid'
+                      : touched.password
+                      ? 'is-valid'
+                      : ''
                   }`}
                   id="password"
                   name="password"
@@ -128,7 +146,18 @@ export default function LoginPage() {
                 className="btn btn-primary w-100 mt-4 py-2"
                 disabled={isSubmitting || !isFormValid}
               >
-                {isSubmitting ? 'Logging in...' : 'Login'}
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Logging in...
+                  </>
+                ) : (
+                  'Login'
+                )}
               </button>
             </form>
 

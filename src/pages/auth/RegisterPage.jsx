@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/layout/MainLayout';
 import { useForm } from '../../hooks/useForm';
 import { useAuth } from '../../context/AuthContext';
-import { useMemo } from 'react';
+import { useToast } from '../../context/ToastContext';
 
 /**
- * Registration page with form for new user signup
+ * Registration page component with form validation
  */
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [apiError, setApiError] = useState('');
+  const { showSuccess, showError } = useToast();
 
   // Form validation function
   const validate = (values) => {
@@ -19,6 +20,8 @@ export default function RegisterPage() {
 
     if (!values.name) {
       errors.name = 'Name is required';
+    } else if (values.name.length < 2) {
+      errors.name = 'Name must be at least 2 characters';
     }
 
     if (!values.email) {
@@ -46,22 +49,27 @@ export default function RegisterPage() {
   const handleRegister = async (values) => {
     setApiError('');
     try {
-      // Use our auth context's register function
       await register({
         name: values.name,
         email: values.email,
         password: values.password,
       });
 
+      // Show success message
+      showSuccess('Registration successful! Redirecting to dashboard...');
+
       // Redirect to dashboard after successful registration
       navigate('/dashboard');
     } catch (error) {
       console.error('Registration error:', error);
-      setApiError(error.message || 'Registration failed. Please try again.');
+      const errorMsg =
+        error.message || 'Registration failed. Please try again.';
+      setApiError(errorMsg);
+      showError(errorMsg);
     }
   };
 
-  // Initialize the form using our custom hook
+  // Initialize form using our custom hook
   const {
     values,
     errors,
@@ -71,23 +79,15 @@ export default function RegisterPage() {
     handleBlur,
     handleSubmit,
   } = useForm(
-    {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+    { name: '', email: '', password: '', confirmPassword: '' },
     handleRegister,
     validate,
   );
 
-  // Determine if form is valid (all fields filled and no errors)
+  // Determine if form is valid
   const isFormValid = useMemo(() => {
-    // Check if all required fields have values
     const allFieldsFilled =
       values.name && values.email && values.password && values.confirmPassword;
-
-    // Check if there are any validation errors
     const noValidationErrors = Object.keys(errors).length === 0;
 
     return allFieldsFilled && noValidationErrors;
@@ -106,15 +106,23 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} noValidate>
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="needs-validation"
+            >
               <div className="mb-3">
                 <label htmlFor="name" className="form-label">
-                  Full Name
+                  Name
                 </label>
                 <input
                   type="text"
                   className={`form-control form-control-lg ${
-                    touched.name && errors.name ? 'is-invalid' : ''
+                    touched.name && errors.name
+                      ? 'is-invalid'
+                      : touched.name
+                      ? 'is-valid'
+                      : ''
                   }`}
                   id="name"
                   name="name"
@@ -126,6 +134,9 @@ export default function RegisterPage() {
                 {touched.name && errors.name && (
                   <div className="invalid-feedback">{errors.name}</div>
                 )}
+                {touched.name && !errors.name && (
+                  <div className="valid-feedback">Looks good!</div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -135,7 +146,11 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   className={`form-control form-control-lg ${
-                    touched.email && errors.email ? 'is-invalid' : ''
+                    touched.email && errors.email
+                      ? 'is-invalid'
+                      : touched.email
+                      ? 'is-valid'
+                      : ''
                   }`}
                   id="email"
                   name="email"
@@ -147,6 +162,9 @@ export default function RegisterPage() {
                 {touched.email && errors.email && (
                   <div className="invalid-feedback">{errors.email}</div>
                 )}
+                {touched.email && !errors.email && (
+                  <div className="valid-feedback">Looks good!</div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -155,8 +173,12 @@ export default function RegisterPage() {
                 </label>
                 <input
                   type="password"
-                  className={`form-control ${
-                    touched.password && errors.password ? 'is-invalid' : ''
+                  className={`form-control form-control-lg ${
+                    touched.password && errors.password
+                      ? 'is-invalid'
+                      : touched.password
+                      ? 'is-valid'
+                      : ''
                   }`}
                   id="password"
                   name="password"
@@ -168,6 +190,9 @@ export default function RegisterPage() {
                 {touched.password && errors.password && (
                   <div className="invalid-feedback">{errors.password}</div>
                 )}
+                {touched.password && !errors.password && (
+                  <div className="valid-feedback">Looks good!</div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -176,9 +201,11 @@ export default function RegisterPage() {
                 </label>
                 <input
                   type="password"
-                  className={`form-control ${
+                  className={`form-control form-control-lg ${
                     touched.confirmPassword && errors.confirmPassword
                       ? 'is-invalid'
+                      : touched.confirmPassword
+                      ? 'is-valid'
                       : ''
                   }`}
                   id="confirmPassword"
@@ -193,6 +220,9 @@ export default function RegisterPage() {
                     {errors.confirmPassword}
                   </div>
                 )}
+                {touched.confirmPassword && !errors.confirmPassword && (
+                  <div className="valid-feedback">Looks good!</div>
+                )}
               </div>
 
               <button
@@ -200,7 +230,18 @@ export default function RegisterPage() {
                 className="btn btn-primary w-100 mt-4 py-2"
                 disabled={isSubmitting || !isFormValid}
               >
-                {isSubmitting ? 'Registering...' : 'Register'}
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Creating account...
+                  </>
+                ) : (
+                  'Register'
+                )}
               </button>
             </form>
 

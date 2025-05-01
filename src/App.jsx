@@ -1,5 +1,6 @@
 import AppRouter from './routes/AppRouter';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -8,9 +9,11 @@ import './App.css';
  */
 function App() {
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
