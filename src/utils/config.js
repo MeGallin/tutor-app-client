@@ -7,8 +7,13 @@
  * API base URL
  * In development with no VITE_API_URL set, defaults to empty string (same-origin)
  * which means requests will be handled by the Vite proxy
+ * In production, points to the backend API deployed on Render.com
  */
-export const API_URL = import.meta.env.VITE_API_URL || '';
+export const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === 'production'
+    ? 'https://your-backend-api.onrender.com'
+    : '');
 
 /**
  * Whether the app is running in development mode

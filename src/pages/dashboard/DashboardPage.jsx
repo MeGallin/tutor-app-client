@@ -23,15 +23,16 @@ const DashboardPage = () => {
 
   // Get user's display name - first check if there's a nested data object (API structure)
   // then check common name properties directly on the currentUser object
-  const displayName = currentUser?.data?.name || 
-                     currentUser?.name || 
-                     currentUser?.data?.userName || 
-                     currentUser?.userName || 
-                     currentUser?.data?.username || 
-                     currentUser?.username || 
-                     currentUser?.data?.fullName || 
-                     currentUser?.fullName || 
-                     'Student';
+  const displayName =
+    currentUser?.data?.name ||
+    currentUser?.name ||
+    currentUser?.data?.userName ||
+    currentUser?.userName ||
+    currentUser?.data?.username ||
+    currentUser?.username ||
+    currentUser?.data?.fullName ||
+    currentUser?.fullName ||
+    'Student';
 
   return (
     <MainLayout>
